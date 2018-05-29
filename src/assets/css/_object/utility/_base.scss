@@ -1,0 +1,14 @@
+@charset "utf-8";
+
+.u-svgDef {
+  width: 0;
+  height: 0;
+  z-index: -1000;
+  position: absolute;
+  overflow: hidden;
+
+  svg {
+    width: inherit;
+    height: inherit;
+  }
+}

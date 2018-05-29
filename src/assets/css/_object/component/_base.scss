@@ -1,0 +1,59 @@
+@charset "utf-8";
+
+.c-loading {
+  transition: visibility 0.2s linear,
+              opacity 0.2s linear;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  z-index: 100;
+}
+
+.c-loading__indicator {
+  @include absoluteCenterVHT;
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+
+  &:after {
+    @include absoluteCenterH;
+    width: 40px;
+    height: 8px;
+    background-color: #000;
+    bottom: 0;
+    content: '';
+  }
+}
+
+.c-loading__indicatorInner {
+  @include absoluteCenterVH;
+  width: 40px;
+  height: 40px;
+  transition: transform 0.4s $easeInOutCubic 0.6s;
+
+  &:before {
+    animation: loadingIndicatorAnim 2s $easeInOutCubic alternate infinite;
+    border: 9px #000 solid;
+    width: 100%;
+    height: 100%;
+    display: block;
+    content: '';
+  }
+}
+
+@keyframes loadingIndicatorAnim {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(540deg); }
+}
+
+.c-loading.is-loaded {
+  opacity: 0;
+  visibility: hidden;
+  transition-delay: 1s;
+}
+.c-loading.is-loaded .c-loading__indicatorInner {
+  transform: translateY(60px) scale(0.4);
+}

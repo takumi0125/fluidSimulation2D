@@ -1,0 +1,30 @@
+//- src/assets/_layout/default.pugを継承
+extends /assets/_layout/default
+
+//- meta設定
+block vars
+  //- 上書き
+  - title ="sample index title"
+  - useTitleSeparater = false
+  - keywords = 'sample index keywords'
+  - description = 'sample index description'
+
+  //- その他変数
+  - bodyClass = 'is-index';  //- bodyタグに付与するクラス
+  - contentsId = 'index'
+
+//- ページ個別のCSS
+block css
+  link(rel="stylesheet", href="/assets/css/index.css")
+
+//- ページ個別のJS(head)
+block scriptHead
+
+//- ページ個別のJS
+block script
+  script(src="/assets/js/index.js")
+
+//- ここからコンテンツ部分を記述
+block contents
+  section.p-mainCanvas.js-mainCanvas
+    canvas

@@ -1,0 +1,525 @@
+@charset "utf-8";
+
+@mixin spriteAnimation($animName, $imgPath, $unitWidth, $unitHeight, $numFrames, $fps: 8, $numCols: 8, $iterationCnt: infinite, $direction: normal, $reverse: false, $offsetTop: 0px) {
+  animation: $animName $direction step-end (1s / $fps * $numFrames);
+  animation-iteration-count: $iterationCnt;
+  background: url($imgPath) no-repeat top left;
+  width: $unitWidth;
+  height: $unitHeight;
+  $index: 0;
+  $rowIndex: 0;
+  $colIndex: 0;
+
+  @keyframes #{$animName} {
+    @for $i from 0 through $numFrames {
+      @if $reverse == true {
+        $index: $numFrames - 1 - $i;
+      } @else {
+        $index: $i;
+      }
+      $rowIndex: floor($index / $numCols);
+      $colIndex: $index - $rowIndex * $numCols;
+      #{100% / $numFrames * $i} { background-position: ($unitWidth * -$colIndex) ($unitHeight * -$rowIndex - $offsetTop); }
+    }
+  }
+
+  &.stop {
+    animation: none;
+    background-position: ($unitWidth * -$colIndex) ($unitHeight * -$rowIndex);
+  }
+}
+
+//------------------//
+//   media queris   //
+//------------------//
+
+// for tablet
+@mixin sizeM {
+  @media screen and (min-width:600px) and (max-width:959px) {
+    @content;
+  }
+}
+
+// for PC
+@mixin sizeL {
+  @media screen and (min-width:960px) and (max-width:1280px) {
+    @content;
+  }
+}
+
+@mixin sizeXL {
+  @media screen and (min-width:1281px) {
+    @content;
+  }
+}
+
+@mixin moreThanSizeL {
+  @media screen and (min-width:960px) {
+    @content;
+  }
+}
+
+
+//------------//
+//   easing   //
+//------------//
+
+$linear: cubic-bezier(0.250, 0.250, 0.750, 0.750);
+$ease: cubic-bezier(0.250, 0.100, 0.250, 1.000);
+$easeIn: cubic-bezier(0.420, 0.000, 1.000, 1.000);
+$easeOut: cubic-bezier(0.000, 0.000, 0.580, 1.000);
+$easeInOut: cubic-bezier(0.420, 0.000, 0.580, 1.000);
+
+$easeInQuad: cubic-bezier(0.550, 0.085, 0.680, 0.530);
+$easeInCubic: cubic-bezier(0.550, 0.055, 0.675, 0.190);
+$easeInQuart: cubic-bezier(0.895, 0.030, 0.685, 0.220);
+$easeInQuint: cubic-bezier(0.755, 0.050, 0.855, 0.060);
+$easeInSine: cubic-bezier(0.470, 0.000, 0.745, 0.715);
+$easeInExpo: cubic-bezier(0.950, 0.050, 0.795, 0.035);
+$easeInCirc: cubic-bezier(0.600, 0.040, 0.980, 0.335);
+$easeInBack: cubic-bezier(0.600, -0.280, 0.735, 0.045);
+
+$easeOutQuad: cubic-bezier(0.250, 0.460, 0.450, 0.940);
+$easeOutCubic: cubic-bezier(0.215, 0.610, 0.355, 1.000);
+$easeOutQuart: cubic-bezier(0.165, 0.840, 0.440, 1.000);
+$easeOutQuint: cubic-bezier(0.230, 1.000, 0.320, 1.000);
+$easeOutSine: cubic-bezier(0.390, 0.575, 0.565, 1.000);
+$easeOutExpo: cubic-bezier(0.190, 1.000, 0.220, 1.000);
+$easeOutCirc: cubic-bezier(0.075, 0.820, 0.165, 1.000);
+$easeOutBack: cubic-bezier(0.175, 0.885, 0.320, 1.275);
+
+$easeInOutQuad: cubic-bezier(0.455, 0.030, 0.515, 0.955);
+$easeInOutCubic: cubic-bezier(0.645, 0.045, 0.355, 1.000);
+$easeInOutQuart: cubic-bezier(0.770, 0.000, 0.175, 1.000);
+$easeInOutQuint: cubic-bezier(0.860, 0.000, 0.070, 1.000);
+$easeInOutSine: cubic-bezier(0.445, 0.050, 0.550, 0.950);
+$easeInOutExpo: cubic-bezier(1.000, 0.000, 0.000, 1.000);
+$easeInOutCirc: cubic-bezier(0.785, 0.135, 0.150, 0.860);
+$easeInOutBack: cubic-bezier(0.680, -0.550, 0.265, 1.550);
+
+
+//-------------//
+//   opacity   //
+//-------------//
+
+@mixin opacity($opacity) {
+  opacity: $opacity;
+  $opacityIE: $opacity * 100;
+  filter: alpha(opacity=$opacityIE);
+}
+
+@mixin autoAlpha($value) {
+  @if $value > 0 {
+    visibility: visible;
+  } @else {
+    visibility: hidden;
+  }
+  opacity: $value;
+}
+
+
+//------------//
+//   button   //
+//------------//
+
+@mixin btnBasic($width, $height) {
+  width: $width;
+  height: $height;
+  a {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// with spritesmith
+@mixin btnSprite($sprite) {
+  @include sprite-width($sprite);
+  @include sprite-height($sprite);
+  a {
+    @include sprite($sprite);
+    @include hidetxt;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// with spritesmith
+@mixin btnSprite2x($sprite) {
+  @include sprite-width-2x($sprite);
+  @include sprite-height-2x($sprite);
+  a {
+    @include sprite2x($sprite);
+    @include hidetxt;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// with spritesmith
+@mixin btnLabelSprite($width, $height, $sprite) {
+  width: $width;
+  height: $height;
+  position: relative;
+  a {
+    @include absoluteTopLeft;
+    display: block;
+    width: 100%;
+    height: 100%;
+    span {
+      @include sprite($sprite);
+      @include hidetxt;
+      @include absoluteCenterVH;
+    }
+  }
+}
+
+@mixin btnLabelSpriteT($width, $height, $sprite) {
+  width: $width;
+  height: $height;
+  position: relative;
+  a {
+    @include absoluteTopLeft;
+    display: block;
+    width: 100%;
+    height: 100%;
+    span {
+      @include sprite($sprite);
+      @include hidetxt;
+      @include absoluteCenterVHT;
+    }
+  }
+}
+
+// with spritesmith
+@mixin btnLabelSprite2x($width, $height, $sprite) {
+  width: $width;
+  height: $height;
+  position: relative;
+  a {
+    @include absoluteTopLeft;
+    display: block;
+    width: 100%;
+    height: 100%;
+    span {
+      @include sprite2x($sprite);
+      @include hidetxt;
+      @include absoluteCenterVH;
+    }
+  }
+}
+
+@mixin btnLabelSprite2xT($width, $height, $sprite) {
+  width: $width;
+  height: $height;
+  position: relative;
+  a {
+    @include absoluteTopLeft;
+    display: block;
+    width: 100%;
+    height: 100%;
+    span {
+      @include sprite2x($sprite);
+      @include hidetxt;
+      @include absoluteCenterVHT;
+    }
+  }
+}
+
+//--------------//
+//   position   //
+//--------------//
+
+@mixin absoluteCenterVH {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+@mixin absoluteCenterVHT {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@mixin absoluteCenterV {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+@mixin absoluteCenterVT {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@mixin absoluteCenterH {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@mixin absoluteCenterHT {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@mixin absoluteTopLeft {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+@mixin absoluteTopRight {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+@mixin absoluteBottomLeft {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+@mixin absoluteBottomRight {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+@mixin absoluteTopCenter {
+  @include absoluteCenterH;
+  top: 0;
+}
+
+@mixin absoluteTopCenterT {
+  @include absoluteCenterHT;
+  top: 0;
+}
+
+@mixin absoluteBottomCenter {
+  @include absoluteCenterH;
+  bottom: 0;
+}
+
+@mixin absoluteBottomCenterT {
+  @include absoluteCenterHT;
+  bottom: 0;
+}
+
+@mixin absoluteCenterLeft {
+  @include absoluteCenterV;
+  left: 0;
+}
+
+@mixin absoluteCenterLeftT {
+  @include absoluteCenterVT;
+  left: 0;
+}
+
+@mixin absoluteCenterRight {
+  @include absoluteCenterV;
+  right: 0;
+}
+
+@mixin absoluteCenterRightT {
+  @include absoluteCenterVT;
+  right: 0;
+}
+
+@mixin fixedCenterVH {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+@mixin fixedCenterVHT {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@mixin fixedCenterV {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+@mixin fixedCenterVT {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@mixin fixedCenterH {
+  position: fixed;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@mixin fixedCenterHT {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+@mixin fixedTopLeft {
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+@mixin fixedTopRight {
+  position: fixed;
+  right: 0;
+  top: 0;
+}
+
+@mixin fixedBottomLeft {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+}
+
+@mixin fixedBottomRight {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+}
+
+@mixin fixedTopCenter {
+  @include fixedCenterH;
+  top: 0;
+}
+
+@mixin fixedTopCenterT {
+  @include fixedCenterHT;
+  top: 0;
+}
+
+@mixin fixedBottomCenter {
+  @include fixedCenterH;
+  bottom: 0;
+}
+
+@mixin fixedBottomCenterT {
+  @include fixedCenterHT;
+  bottom: 0;
+}
+
+@mixin fixedCenterLeft {
+  @include fixedCenterV;
+  left: 0;
+}
+
+@mixin fixedCenterLeftT {
+  @include fixedCenterVT;
+  left: 0;
+}
+
+@mixin fixedCenterRight {
+  @include fixedCenterV;
+  right: 0;
+}
+
+@mixin fixedCenterRightT {
+  @include fixedCenterVT;
+  right: 0;
+}
+
+@mixin negativeMarginCenterVH($marginTop, $marginLeft) {
+  position: absolute;
+  margin: $marginTop 0 0 $marginLeft;
+  left: 50%;
+  top: 50%;
+}
+
+@mixin negativeMarginCenterV($marginTop) {
+  position: absolute;
+  margin-top: $marginTop;
+  top: 50%;
+}
+
+@mixin negativeMarginCenterH($marginLeft) {
+  position: absolute;
+  margin-left: $marginLeft;
+  left: 50%;
+}
+
+
+@mixin sprite-width-2x($sprite) {
+  width: nth($sprite, 5) / 2;
+}
+
+@mixin sprite-height-2x($sprite) {
+  height: nth($sprite, 6) / 2;
+}
+
+@mixin sprite-position-2x($sprite) {
+  $sprite-offset-x: nth($sprite, 3)/2;
+  $sprite-offset-y: nth($sprite, 4)/2;
+  background-position: $sprite-offset-x  $sprite-offset-y;
+}
+
+@mixin sprite-image-2x($sprite) {
+  $sprite-image: nth($sprite, 9);
+  background-image: url(#{$sprite-image});
+}
+
+@mixin sprite-size-2x($sprite) {
+  background-size: nth($sprite, 7)/2 nth($sprite, 8)/2;
+}
+
+@mixin sprite2x($sprite) {
+  @include sprite-image-2x($sprite);
+  @include sprite-position-2x($sprite);
+  @include sprite-width-2x($sprite);
+  @include sprite-height-2x($sprite);
+  @include sprite-size-2x($sprite);
+}
+
+//------------//
+//   others   //
+//------------//
+
+@mixin hidetxt {
+  text-indent: 120%;
+  white-space: nowrap;
+  overflow: hidden;
+  line-height: 0.1;
+}
+
+@mixin clearfix {
+  &:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+  }
+}
+
+@mixin breakall {
+  word-break: break-all !important;
+}

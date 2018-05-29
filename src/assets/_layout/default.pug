@@ -1,0 +1,95 @@
+doctype html
+html(prefix="og:http://ogp.me/ns#")
+  //- 個別ページからの変数を反映
+  block vars
+
+  //- ページ個別のタイトルがある場合
+  //- かつuseTitleSeparaterがtrueの場合はサイトタイトルとセパレータで連結
+  if title
+    if useTitleSeparater
+      - title = title + titleSeparater + siteTitle;
+  else
+    - var title = siteTitle;
+
+  //- ogTitleをtitleと同じにするかどうか
+  if useTitleAsOgTitle
+    - ogTitle = title;
+
+  //- ogDescriptionをdescriptionと同じにするかどうか
+  if useDescriptionAsOgDescription
+    - ogDescription = description;
+
+  head
+    title #{title}
+    meta(charset="utf-8")
+    meta(name="viewport", content="width=device-width,initial-scale=1")
+
+    meta(name="keywords", content=keywords)
+    meta(name="description", content=description)
+
+    if showOGP
+      meta(property="og:title", content=ogTitle)
+      meta(property="og:site_name", content=ogSiteName || ogTitle)
+      meta(property="og:description", content=ogDescription)
+      meta(property="og:url", content=siteUrl)
+      meta(property="og:type", content=ogType)
+      meta(property="og:image", content=ogImage)
+
+      if ogImageType !== 'undefined'
+        meta(property="og:image:type", content=ogImageType)
+
+      if ogImageWidth !== 'undefined'
+        meta(property="og:image:width", content=ogImageWidth)
+
+      if ogImageHeight !== 'undefined'
+        meta(property="og:image:height", content=ogImageHeight)
+
+    if showTwitterCard
+      if useOgAsTwitterCard
+        - twitterCardTitle = ogTitle;
+        - twitterCardDesc = ogDescription;
+        - twitterCardImg = ogImage;
+      meta(name="twitter:card", content=twitterCardType)
+      meta(name="twitter:title", content=twitterCardTitle)
+      meta(name="twitter:description", content=twitterCardDesc)
+      meta(name="twitter:image", content=twitterCardImg)
+
+    if favicons
+      each value, key in favicons
+        - var attributes = {};
+        if value.indexOf('.png') >= 0
+          - attributes.type = 'image/png'
+        if key != 'default'
+          - attributes.size = key
+
+        link(rel="icon", href=value)&attributes(attributes)
+
+    if appleTouchIcons
+      each value, key in appleTouchIcons
+        - var attributes = {};
+        if key != 'default'
+          - attributes.size = key
+
+        link(rel="apple-touch-icon", href=value)&attributes(attributes)
+
+    if manifestJson
+      link(rel="manifest" href=manifestJson)
+
+    //- css block ページ個別のCSS
+    block css
+
+    //- head内で読み込みたいJS
+    block scriptHead
+
+
+  body(class=bodyClass)
+    svg.u-svgDef
+      defs.
+
+    div#wrapper
+      div#contents
+        block contents
+
+    script(src="/assets/js/lib.js")
+    script(src="/assets/js/common.js")
+    block script

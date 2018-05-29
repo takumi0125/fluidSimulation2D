@@ -1,0 +1,57 @@
+#
+# バージョン管理対象外デフォルト指定
+#
+
+# 全般
+*.tmp
+*.bak
+*.swp
+
+# Linux 一般
+*~
+
+# Mac OS X 一般
+._*
+.AppleDesktop
+.AppleDouble
+.DS_Store
+.Spotlight-V100
+.Trashes
+.localized
+Icon
+
+# Windows 一般
+$RECYCLE.BIN/
+Desktop.ini
+Thumbs.db
+
+# Eclipse
+.project
+.metadata
+.classpath
+.loadpath
+local.properties
+
+# TextMate
+*.tmproj
+*.tmproject
+tmtags
+
+# Vim
+*.un~
+.*.sw[a-z]
+Session.vim
+
+node_modules
+credentials
+bower_components
+.sass-cache
+.cache-loader
+npm-debug.log
+
+#editor
+.idea/
+
+htdocs/
+
+!icon/
