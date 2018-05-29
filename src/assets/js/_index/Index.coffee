@@ -4,10 +4,10 @@ import Fluid from './Fluid'
 
 export default class Index
   constructor: ->
-    @initWebGL()
-    @animationId = null
-    @startTime = new Date().getTime()
-    @update()
+    @initWebGL().then =>
+      @animationId = null
+      @startTime = new Date().getTime()
+      @update()
 
 
   initWebGL: ->
@@ -17,6 +17,7 @@ export default class Index
       alpha: true
       # antialias: true
     @devicePixelRatio = Math.min(window.devicePixelRatio or 1, 2)
+    @devicePixelRatio = 1
     @renderer.setPixelRatio @devicePixelRatio
 
     @scene = new THREE.Scene()
@@ -24,16 +25,14 @@ export default class Index
     @width = @container.offsetWidth
     @height = @container.offsetHeight
 
-    @camera = new THREE.OrthographicCamera -@width * 0.5, @width * 0.5, @height * 0.5, -@height * 0.5, 0.1, 100
+    @camera = new THREE.OrthographicCamera -@width * 0.5, @width * 0.5, @height * 0.5, -@height * 0.5, 0, 100
     @camera.position.z = 10
-    @camera.lookAt 0, 0, 0
 
     if !@renderer.extensions.get('OES_texture_float')? and !@renderer.extensions.get('OES_texture_half_float')?
       alert 'not supported'
 
     # fluid
     @fluid = new Fluid @devicePixelRatio, @renderer, @camera
-    @scene.add @fluid.mesh
 
     # mouse
     @isMousePosInited = false
@@ -45,7 +44,12 @@ export default class Index
     window.addEventListener 'mousemove', @mouseMove
     window.addEventListener 'touchmove', @touchMove
 
+    promise = @fluid.init('/assets/img/logo.png', @width, @height).then =>
+      @scene.add @fluid.mesh
+      @resize()
+
     @resize()
+    return promise
 
 
 
