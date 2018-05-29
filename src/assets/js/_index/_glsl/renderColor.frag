@@ -1,4 +1,3 @@
-// color 4 (ハチドリ)
 precision highp float;
 
 uniform float time;
