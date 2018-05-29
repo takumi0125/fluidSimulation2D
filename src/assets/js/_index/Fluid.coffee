@@ -6,14 +6,14 @@ export default class Fluid
 
   init: (imgPath, width, height)->
     # 各種変数
-    @dataTexPixelRatio = 0.4          # ピクセル比
+    @dataTexPixelRatio = 0.4      # データテクスチャのピクセル比
     @solverIteration = 20         # 圧力計算の回数
     @attenuation = 1.00           # 圧力のステップごとの減衰値
     @alpha = 1.0                  # 圧力計算時の係数
     @beta = 1.0                   # 圧力計算時の係数
-    @viscosity = 1            # 粘度
+    @viscosity = 1                # 粘度
     @forceRadius = 90             # 加える力の半径
-    @forceCoefficient = 1    # 加える力の係数
+    @forceCoefficient = 1         # 加える力の係数
     @autoforceCoefficient = 0.01  # 自動で加える力の係数
 
     commonGeometry = new THREE.PlaneGeometry 10, 10
