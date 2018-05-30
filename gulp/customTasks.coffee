@@ -19,18 +19,6 @@ module.exports = (gulp, gulpPlugins, config, utils)->
     'lib'
   )
 
-  # common.js
-  utils.createWebpackJsTask(
-    "commonJs"
-    [ "#{config.srcDir}/#{config.assetsDir}/js/_common/init.coffee" ]
-    [
-      "#{config.srcDir}/#{config.assetsDir}/js/_utils/**/*"
-      "#{config.srcDir}/#{config.assetsDir}/js/_common/**/*"
-    ]
-    "#{config.publishDir}/#{config.assetsDir}/js"
-    'common'
-  )
-
   # contents js
   utils.createWebpackJsTask(
     "indexJs"

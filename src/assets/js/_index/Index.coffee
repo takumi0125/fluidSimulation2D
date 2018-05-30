@@ -16,7 +16,8 @@ export default class Index
       canvas: @container.querySelector 'canvas'
       alpha: true
       # antialias: true
-    @devicePixelRatio = Math.min(window.devicePixelRatio or 1, 2)
+    # @devicePixelRatio = Math.min(window.devicePixelRatio or 1, 2)
+    @devicePixelRatio = 1
     @renderer.setPixelRatio @devicePixelRatio
 
     @scene = new THREE.Scene()
