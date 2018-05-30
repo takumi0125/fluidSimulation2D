@@ -31,7 +31,7 @@ void main(){
 
   vec4 color = vec4(hsv2rgb(vec3(
     map(1.0 - p2, 0.0, 1.0, h1, h2, false),
-    map(p1, 0.0, 1.0, s1, s2, true),
+    map(p1, 0.0, 1.0, s1, s2, false),
     map(1.0 - p2, 0.0, 1.0, v1, v2, true)
   )), 1.0);
 

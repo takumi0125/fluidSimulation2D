@@ -11,10 +11,10 @@ uniform sampler2D tex;
 #pragma glslify: hsv2rgb = require('../../_utils/glsl/hsv2rgb.glsl')
 
 void main(){
-  float offsetT =  -resolution.y * 0.5 * texPixelRatio;
-  float uvT = gl_FragCoord.y / texResolution.y * texPixelRatio;
+  float offsetT =  -resolution.y * 0.5;
+  float uvT = gl_FragCoord.y / texResolution.y / texPixelRatio;
   vec2 uv = vec2(
-    gl_FragCoord.x / texResolution.x * texPixelRatio - resolution.x * 0.5 * texPixelRatio,
+    gl_FragCoord.x / texResolution.x / texPixelRatio - resolution.x * 0.5,
     uvT + offsetT
   );
   uv.x += (step(1.0, mod(float(uvT + offsetT), 2.0)) * uv.x / resolution.x);
