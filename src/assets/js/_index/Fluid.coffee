@@ -11,10 +11,10 @@ export default class Fluid
     @attenuation = 1.00           # 圧力のステップごとの減衰値
     @alpha = 1.0                  # 圧力計算時の係数
     @beta = 1.0                   # 圧力計算時の係数
-    @viscosity = 1                # 粘度
+    @viscosity = 0.999            # 粘度
     @forceRadius = 90             # 加える力の半径
     @forceCoefficient = 1         # 加える力の係数
-    @autoforceCoefficient = 0.01  # 自動で加える力の係数
+    @autoforceCoefficient = 0     # 自動で加える力の係数
 
     commonGeometry = new THREE.PlaneGeometry 10, 10
 
