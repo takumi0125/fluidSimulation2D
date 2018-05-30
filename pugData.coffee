@@ -1,23 +1,23 @@
 config =
   default:
-    siteUrl: 'https://dev.sample.jp/'
-    keywords: 'sample keywords'
+    siteUrl: 'https://takumi0125.github.io/fluidSimulation2D/displacement/'
+    keywords: 'webgl, threejs, fluid simulation 2D'
 
     showOGP: true # ogpタグを表示するかどうか
 
-    siteTitle: 'sample'
+    siteTitle: 'displacement by fluid | fluid simulation 2D'
     useTitleAsOgTitle: true # ogTitleをtitleと同じにするかどうか
     ogTitle: ''
     useTitleSeparater: true
     titleSeparater: ' | '
 
-    description: "sample description."
+    description: "displacement by fluid"
     useDescriptionAsOgDescription: true # ogDescriptionをdescriptionと同じにするかどうか
     ogDescription: ""
 
-    ogSiteName: 'sample'
+    ogSiteName: 'displacement by fluid | fluid simulation 2D'
 
-    ogImage: 'https://dev.sample.jp/assets/img/ogp.png'
+    ogImage: 'https://takumi0125.github.io/fluidSimulation2D/assets/img/ogpDisplacement.png'
     ogImageType: 'image/png'
     ogImageWidth: '1200'
     ogImageHeight: '630'
@@ -51,16 +51,16 @@ config =
     manifestJson: '/assets/img/icon/manifest.json'
 
   develop:
-    siteUrl: 'https://dev.sample.jp/'
-    ogImage: 'https://dev.sample.jp/assets/img/ogp.png'
+    siteUrl: 'https://takumi0125.github.io/fluidSimulation2D/displacement/'
+    ogImage: 'https://takumi0125.github.io/fluidSimulation2D/assets/img/ogpDisplacement.png'
 
   staging:
-    siteUrl: 'https://stg.sample.jp/'
-    ogImage: 'https://stg.sample.jp/assets/img/ogp.png'
+    siteUrl: 'https://takumi0125.github.io/fluidSimulation2D/displacement/'
+    ogImage: 'https://takumi0125.github.io/fluidSimulation2D/assets/img/ogpDisplacement.png'
 
   production:
-    siteUrl: 'https://sample.jp/'
-    ogImage: 'https://sample.jp/assets/img/ogp.png'
+    siteUrl: 'https://takumi0125.github.io/fluidSimulation2D/displacement/'
+    ogImage: 'https://takumi0125.github.io/fluidSimulation2D/assets/img/ogpDisplacement.png'
 
 
 module.exports = (env) ->
