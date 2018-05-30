@@ -90,20 +90,6 @@ export default class Fluid
           dataTex      : { type:  't', value: null }
           attenuation  : { type: '1f', value: @attenuation }  # 減衰
 
-      # 画像描画
-      renderImg: new THREE.RawShaderMaterial
-        vertexShader: require('./_glsl/common.vert')
-        fragmentShader: require('./_glsl/renderImg.frag')
-        depthTest: false
-        depthWrite: false
-        uniforms:
-          time            : { type: '1f', value: 0 }
-          texPixelRatio   : { type: '1f', value: @devicePixelRatio }
-          dataTex         : { type:  't', value: null }
-          outputImgTex    : { type:  't', value: null }
-          resolution      : { type: '2f', value: new THREE.Vector2(width, height) }
-          devicePixelRatio: { type: '1f', value: @devicePixelRatio }
-
       # 画像描画 イニシャライズ
       initRenderImg: new THREE.RawShaderMaterial
         vertexShader: require('./_glsl/common.vert')
@@ -149,9 +135,6 @@ export default class Fluid
         @setShaderUniform 'initRenderImg', 'tex', texture
         @setShaderUniform 'initRenderImg', 'texResolution', new THREE.Vector2(texture.image.width, texture.image.height)
 
-        @setShaderUniform 'renderImg', 'outputImgTex', texture
-        @setShaderUniform 'renderImg', 'dataTex', @dataTex.getTexture()
-
         texture.needsUpdate = true
 
         @outputImgTex = new RenderTexture(
@@ -160,11 +143,10 @@ export default class Fluid
           @renderer
           @camera
           @shaderMaterials.initRenderImg
-          @shaderMaterials.renderImg
+          @shaderMaterials.initRenderImg.clone()
           textureType
           commonGeometry
         )
-        # @setShaderUniform 'renderImg', 'outputImgTex', @outputImgTex.getTexture()
         @setShaderUniform 'render', 'outputImgTex', @outputImgTex.getTexture()
         resolve()
 
@@ -221,13 +203,6 @@ export default class Fluid
 
     # データを伝播
     @updateData 'advectData'
-
-    # img更新
-    @setShaderUniform 'renderImg', 'outputImgTex', @outputImgTex.getTexture()
-    @outputImgTex.swapTexture()
-    @setShaderUniform 'renderImg', 'time', time
-    @setShaderUniform 'renderImg', 'dataTex', @dataTex.getTexture()
-    @renderer.render @outputImgTex.scene, @outputImgTex.camera, @outputImgTex.getRenderTarget()
 
     # 描画
     @setShaderUniform 'render', 'time', time
