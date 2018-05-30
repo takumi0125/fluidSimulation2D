@@ -10,15 +10,15 @@ export default class Fluid
     @beta = 1.0                   # 圧力計算時の係数
     @viscosity = 0.99             # 粘度
     @forceRadius = 90             # 加える力の半径
-    @forceCoefficient = 1.0       # 加える力の係数
+    @forceCoefficient = 1         # 加える力の係数
     @autoforceCoefficient = 0.06  # 自動で加える力の係数
 
     # シェーダマテリアルを初期化
     @shaders = {}
 
-    @shaders.main = new THREE.RawShaderMaterial
+    @shaders.render = new THREE.RawShaderMaterial
       vertexShader: require('./_glsl/common.vert')
-      fragmentShader: require("./_glsl/renderColor.frag")
+      fragmentShader: require("./_glsl/render.frag")
       depthTest: false
       depthWrite: false
       uniforms:
@@ -93,7 +93,7 @@ export default class Fluid
     geometry = new THREE.PlaneGeometry 100, 100
 
     # mesh
-    @mesh = new THREE.Mesh geometry, @shaders.main
+    @mesh = new THREE.Mesh geometry, @shaders.render
     return
 
 
@@ -150,8 +150,8 @@ export default class Fluid
     @updateData 'advectData'
 
     # 描画
-    @setShaderUniform 'main', 'time'   , time
-    @setShaderUniform 'main', 'dataTex', @dataTexture.getTexture()
+    @setShaderUniform 'render', 'time'   , time
+    @setShaderUniform 'render', 'dataTex', @dataTexture.getTexture()
     return
 
 
