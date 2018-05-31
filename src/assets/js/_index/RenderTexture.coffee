@@ -1,45 +1,38 @@
 export default class RenderTexture
-  constructor: (width, height, @renderer, @camera, @initShaderMaterial, @updateShaderMaterial, type, commonGeometry = null)->
+  constructor: (width, height, @renderer, @camera, @initShaderMaterial, @updateShaderMaterial)->
     @currentTextureIndex = 0
 
     @renderTargets = [ new THREE.WebGLRenderTarget(width, height, {
       magFilter: THREE.NearestFilter
       minFilter: THREE.NearestFilter
-      wrapS: THREE.RepeatWrapping
-      wrapT: THREE.RepeatWrapping
+      wrapS: THREE.ClampToEdgeWrapping
+      wrapT: THREE.ClampToEdgeWrapping
       format: THREE.RGBAFormat
-      type: type
+      type: (if(/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) then THREE.HalfFloatType else THREE.FloatType)
       depthBuffer: false
       stencilBuffer: false
+      generateMipmaps: false
+      shareDepthFrom: null
     })]
     @renderTargets[1] = @renderTargets[0].clone()
 
-    if commonGeometry?
-      planeGeometry = commonGeometry
-    else
-      planeGeometry = new THREE.PlaneGeometry(100, 100)
+    planeGeometry = new THREE.PlaneGeometry(100, 100)
 
     @mesh = new THREE.Mesh planeGeometry, @initShaderMaterial
-    @mesh.material.needsUpdate = true
 
     @scene = new THREE.Scene()
     @scene.add @mesh
 
-    @reset()
-
-
-  reset: ->
-    @mesh.material = @initShaderMaterial
-
     @renderer.render @scene, @camera, @renderTargets[0]
     @renderer.render @scene, @camera, @renderTargets[1]
 
-    # @initShaderMaterial.dispose()
-    # @initShaderMaterial = null
+    @initShaderMaterial.dispose()
+    @initShaderMaterial = null
 
     @mesh.material = @updateShaderMaterial
-    @mesh.material.needsUpdate = true
-    return
+
+    @renderTargets[0].texture.flipY = false
+    @renderTargets[1].texture.flipY = false
 
 
   setDefine: (name, value)->

@@ -1,180 +1,142 @@
 import RenderTexture from './RenderTexture'
+import map from '../_utils/math/map'
 
 export default class Fluid
-  constructor: (@devicePixelRatio, @renderer, @camera)->
-
-
-  init: (imgPath, width, height)->
+  constructor: (devicePixelRatio, @renderer, camera)->
     # 各種変数
-    @dataTexPixelRatio = 0.4      # データテクスチャのピクセル比
+    @texPixelRatio = 0.4          # ピクセル比
     @solverIteration = 20         # 圧力計算の回数
     @attenuation = 1.00           # 圧力のステップごとの減衰値
     @alpha = 1.0                  # 圧力計算時の係数
     @beta = 1.0                   # 圧力計算時の係数
-    @viscosity = 1                # 粘度
-    @forceRadius = 90             # 加える力の半径
+    @viscosity = 0.99             # 粘度
+    @forceRadius = 10             # 加える力の半径
     @forceCoefficient = 1         # 加える力の係数
-    @autoforceCoefficient = 0.01  # 自動で加える力の係数
+    @velocityTimeScale = 1        # 速度のタイムスケール
 
-    commonGeometry = new THREE.PlaneGeometry 10, 10
+    @spirographVertices = 3       # スピログラフの頂点数
+    @spirographRadius = 100       # スピログラフの半径
 
     # シェーダマテリアルを初期化
-    @shaderMaterials =
+    @shaders = {}
 
-      # 描画
-      render: new THREE.RawShaderMaterial
-        vertexShader: require('./_glsl/common.vert')
-        fragmentShader: require("./_glsl/render.frag")
-        depthTest: false
-        depthWrite: false
-        transparent: true
-        uniforms:
-          time            : { type: '1f', value: 0 }
-          texPixelRatio   : { type: '1f', value: @dataTexPixelRatio }
-          dataTex         : { type:  't', value: null }
-          outputImgTex    : { type:  't', value: null }
-          resolution      : { type: '2f', value: null }
-          devicePixelRatio: { type: '1f', value: @devicePixelRatio }
+    @shaders.render = new THREE.RawShaderMaterial
+      vertexShader: require('./_glsl/common.vert')
+      fragmentShader: require("./_glsl/render.frag")
+      depthTest: false
+      depthWrite: false
+      uniforms:
+        time            : { type: '1f', value: 0 }
+        texPixelRatio   : { type: '1f', value: @texPixelRatio }
+        dataTex         : { type:  't', value: null }
+        resolution      : { type: '2f', value: null }
+        devicePixelRatio: { type: '1f', value: devicePixelRatio }
 
-      # updateDivergence: 発散を計算
-      updateDivergence: new THREE.RawShaderMaterial
-        vertexShader: require('./_glsl/common.vert')
-        fragmentShader: require('./_glsl/updateDivergence.frag')
-        depthTest: false
-        depthWrite: false
-        uniforms:
-          texPixelRatio: { type: '1f', value: @dataTexPixelRatio }
-          resolution   : { type: '2f', value: null }
-          dataTex      : { type:  't', value: null }
+    # updateDivergence: 発散を計算
+    @shaders.updateDivergence = new THREE.RawShaderMaterial
+      vertexShader: require('./_glsl/common.vert')
+      fragmentShader: require('./_glsl/updateDivergence.frag')
+      uniforms:
+        texPixelRatio: { type: '1f', value: @texPixelRatio }
+        resolution   : { type: '2f', value: null }
+        dataTex      : { type:  't', value: null }
 
-      # updatePressure: 圧力を計算
-      updatePressure: new THREE.RawShaderMaterial
-        vertexShader: require('./_glsl/common.vert')
-        fragmentShader: require('./_glsl/updatePressure.frag')
-        depthTest: false
-        depthWrite: false
-        uniforms:
-          texPixelRatio: { type: '1f', value: @dataTexPixelRatio }
-          resolution   : { type: '2f', value: null }
-          dataTex      : { type:  't', value: 0 }
-          alpha        : { type: '1f', value: @alpha }
-          beta         : { type: '1f', value: @beta }
+    # updatePressure: 圧力を計算
+    @shaders.updatePressure = new THREE.RawShaderMaterial
+      vertexShader: require('./_glsl/common.vert')
+      fragmentShader: require('./_glsl/updatePressure.frag')
+      uniforms:
+        texPixelRatio: { type: '1f', value: @texPixelRatio }
+        resolution   : { type: '2f', value: null }
+        dataTex      : { type:  't', value: 0 }
+        alpha        : { type: '1f', value: @alpha }
+        beta         : { type: '1f', value: @beta }
 
-      # updateVelocity: 速度を計算
-      updateVelocity: new THREE.RawShaderMaterial
-        vertexShader: require('./_glsl/common.vert')
-        fragmentShader: require('./_glsl/updateVelocity.frag')
-        depthTest: false
-        depthWrite: false
-        uniforms:
-          time                : { type: '1f', value: 0 }
-          texPixelRatio       : { type: '1f', value: @dataTexPixelRatio }
-          viscosity           : { type: '1f', value: @viscosity }  # 粘度
-          forceRadius         : { type: '1f', value: @forceRadius }
-          forceCoefficient    : { type: '1f', value: @forceCoefficient }
-          autoforceCoefficient: { type: '1f', value: @autoforceCoefficient }
-          resolution          : { type: '2f', value: null }
-          dataTex             : { type:  't', value: null }
-          pointerPos          : { type: '2f', value: null }
-          beforePointerPos    : { type: '2f', value: null }
+    # updateVelocity: 速度を計算
+    @shaders.updateVelocity = new THREE.RawShaderMaterial
+      vertexShader: require('./_glsl/common.vert')
+      fragmentShader: require('./_glsl/updateVelocity.frag')
+      uniforms:
+        time                : { type: '1f', value: 0 }
+        velocityTimeScale   : { type: '1f', value: @velocityTimeScale }
+        texPixelRatio       : { type: '1f', value: @texPixelRatio }
+        viscosity           : { type: '1f', value: @viscosity }  # 粘度
+        forceRadius         : { type: '1f', value: @forceRadius }
+        forceCoefficient    : { type: '1f', value: @forceCoefficient }
+        resolution          : { type: '2f', value: null }
+        dataTex             : { type:  't', value: null }
+        spirographVertices  : { type: '1f', value: @spirographVertices }
+        spirographRadius    : { type: '1f', value: @spirographRadius }
 
-      # advectData: データを伝搬
-      advectData: new THREE.RawShaderMaterial
-        vertexShader: require('./_glsl/common.vert')
-        fragmentShader: require('./_glsl/advectData.frag')
-        depthTest: false
-        depthWrite: false
-        uniforms:
-          resolution   : { type: '2f', value: null }
-          texPixelRatio: { type: '1f', value: @dataTexPixelRatio }
-          dataTex      : { type:  't', value: null }
-          attenuation  : { type: '1f', value: @attenuation }  # 減衰
+    # advectData: データを伝搬
+    @shaders.advectData = new THREE.RawShaderMaterial
+      vertexShader: require('./_glsl/common.vert')
+      fragmentShader: require('./_glsl/advectData.frag')
+      uniforms:
+        resolution   : { type: '2f', value: null }
+        texPixelRatio: { type: '1f', value: @texPixelRatio }
+        dataTex      : { type:  't', value: null }
+        attenuation  : { type: '1f', value: @attenuation }  # 減衰
 
-      # 画像描画
-      renderImg: new THREE.RawShaderMaterial
-        vertexShader: require('./_glsl/common.vert')
-        fragmentShader: require('./_glsl/renderImg.frag')
-        depthTest: false
-        depthWrite: false
-        uniforms:
-          time            : { type: '1f', value: 0 }
-          texPixelRatio   : { type: '1f', value: @devicePixelRatio }
-          dataTex         : { type:  't', value: null }
-          outputImgTex    : { type:  't', value: null }
-          resolution      : { type: '2f', value: new THREE.Vector2(width, height) }
-          devicePixelRatio: { type: '1f', value: @devicePixelRatio }
-
-      # 画像描画 イニシャライズ
-      initRenderImg: new THREE.RawShaderMaterial
-        vertexShader: require('./_glsl/common.vert')
-        fragmentShader: require('./_glsl/initRenderImg.frag')
-        depthTest: false
-        depthWrite: false
-        uniforms:
-          time             : { type: '1f', value: 0 }
-          texPixelRatio    : { type: '1f', value: @devicePixelRatio }
-          tex              : { type:  't', value: null }
-          texResolution    : { type: '2f', value: new THREE.Vector2() }
-          resolution       : { type: '2f', value: new THREE.Vector2(width, height) }
-
-
-    # RenderTexture dataTex
-    initDataTexMaterial = new THREE.RawShaderMaterial(
+    # RenderTexture
+    initMaterial = new THREE.RawShaderMaterial(
       vertexShader: require('./_glsl/common.vert')
       fragmentShader: require('./_glsl/initData.frag')
       depthTest: false
       depthWrite: false
     )
-    textureType = (if(/(iPad|iPhone|iPod)/g.test(navigator.userAgent)) then THREE.HalfFloatType else THREE.FloatType)
-    @dataTex = new RenderTexture(
-      Math.round(width * @dataTexPixelRatio)
-      Math.round(height * @dataTexPixelRatio)
+    @dataTexture = new RenderTexture(
+      100
+      100
       @renderer
-      @camera
-      initDataTexMaterial
-      initDataTexMaterial.clone()
-      textureType
-      commonGeometry
+      camera
+      initMaterial
+      initMaterial.clone()
     )
 
+    geometry = new THREE.PlaneGeometry 100, 100
+
     # mesh
-    @mesh = new THREE.Mesh commonGeometry, @shaderMaterials.render
+    @mesh = new THREE.Mesh geometry, @shaders.render
 
-    # RenderTexture outputImgTex
-    return new Promise (resolve)=>
-      new THREE.TextureLoader().load imgPath, (texture)=>
-        texture.wrapS = THREE.RepeatWrapping
-        texture.wrapT = THREE.RepeatWrapping
+    gui = new dat.GUI()
 
-        @setShaderUniform 'initRenderImg', 'tex', texture
-        @setShaderUniform 'initRenderImg', 'texResolution', new THREE.Vector2(texture.image.width, texture.image.height)
+    gui.add @, 'texPixelRatio', 0.01, 1
+    .onChange (value)=>
+      @setShaderUniform 'updateDivergence', 'texPixelRatio', value
+      @setShaderUniform 'updatePressure',   'texPixelRatio', value
+      @setShaderUniform 'updateVelocity',   'texPixelRatio', value
+      @setShaderUniform 'advectData',       'texPixelRatio', value
+      @dataTexture.resize Math.round(@width * value), Math.round(@height * value)
+      return
 
-        @setShaderUniform 'renderImg', 'outputImgTex', texture
-        @setShaderUniform 'renderImg', 'dataTex', @dataTex.getTexture()
+    gui.add @, 'viscosity', 0.8, 1
+    .onChange (value)=> @setShaderUniform 'updateVelocity', 'viscosity', value
 
-        texture.needsUpdate = true
+    gui.add @, 'forceRadius', 1, 100
+    .onChange (value)=> @setShaderUniform 'updateVelocity', 'forceRadius', value
 
-        @outputImgTex = new RenderTexture(
-          width
-          height
-          @renderer
-          @camera
-          @shaderMaterials.initRenderImg
-          @shaderMaterials.renderImg
-          textureType
-          commonGeometry
-        )
-        # @setShaderUniform 'renderImg', 'outputImgTex', @outputImgTex.getTexture()
-        @setShaderUniform 'render', 'outputImgTex', @outputImgTex.getTexture()
-        resolve()
+    gui.add @, 'forceCoefficient', 0.01, 10
+    .onChange (value)=> @setShaderUniform 'updateVelocity', 'forceCoefficient', value
+
+    gui.add(@, 'spirographVertices', 3, 12).step(1)
+    .onChange (value)=> @setShaderUniform 'updateVelocity', 'spirographVertices', Math.round(value)
+
+    gui.add @, 'spirographRadius', 30, 400
+    .onChange (value)=> @setShaderUniform 'updateVelocity', 'spirographRadius', value
+
+    gui.add @, 'velocityTimeScale', 0, 3
+    .onChange (value)=> @setShaderUniform 'updateVelocity', 'velocityTimeScale', value
+
+    return
 
 
   # 各種パラメータを設定
   setParameters: ->
-    @setShaderUniform 'updateDivergence', 'texPixelRatio', @dataTexPixelRatio
-    @setShaderUniform 'updatePressure',   'texPixelRatio', @dataTexPixelRatio
-    @setShaderUniform 'updateVelocity',   'texPixelRatio', @dataTexPixelRatio
-    @setShaderUniform 'advectData',       'texPixelRatio', @dataTexPixelRatio
+    @setShaderUniform 'updateDivergence', 'texPixelRatio', @texPixelRatio
+    @setShaderUniform 'updatePressure',   'texPixelRatio', @texPixelRatio
+    @setShaderUniform 'updateVelocity',   'texPixelRatio', @texPixelRatio
+    @setShaderUniform 'advectData',       'texPixelRatio', @texPixelRatio
 
     @setShaderUniform 'advectData', 'attenuation', @attenuation
 
@@ -192,21 +154,20 @@ export default class Fluid
 
   # データを更新
   updateData: (name)->
-    @setShaderUniform name, 'dataTex', @dataTex.getTexture()
-    @dataTex.swapTexture()
-    @dataTex.setMeshMaterial @shaderMaterials[name]
-    @renderer.render @dataTex.scene, @dataTex.camera, @dataTex.getRenderTarget()
+    @setShaderUniform name, 'dataTex', @dataTexture.getTexture()
+    @dataTexture.swapTexture()
+    @dataTexture.setMeshMaterial @shaders[name]
+    @renderer.render @dataTexture.scene, @dataTexture.camera, @dataTexture.getRenderTarget()
     return
 
 
   # set shader uniform
   setShaderUniform: (name, key, value)->
-    @shaderMaterials[name].uniforms[key]?.value = value
-    @shaderMaterials[name].needsUpdate = true
+    @shaders[name].uniforms[key].value = value
     return
 
 
-  update: (time, pointerPos, beforePointerPos)=>
+  update: (time)=>
     # 発散のバッファを更新
     @updateData 'updateDivergence'
 
@@ -215,45 +176,21 @@ export default class Fluid
 
     # 速度のバッファを更新
     @setShaderUniform 'updateVelocity', 'time', time
-    @setShaderUniform 'updateVelocity', 'pointerPos', pointerPos
-    @setShaderUniform 'updateVelocity', 'beforePointerPos', beforePointerPos
     @updateData 'updateVelocity'
 
     # データを伝播
     @updateData 'advectData'
 
-    # img更新
-    @setShaderUniform 'renderImg', 'outputImgTex', @outputImgTex.getTexture()
-    @outputImgTex.swapTexture()
-    @setShaderUniform 'renderImg', 'time', time
-    @setShaderUniform 'renderImg', 'dataTex', @dataTex.getTexture()
-    @renderer.render @outputImgTex.scene, @outputImgTex.camera, @outputImgTex.getRenderTarget()
-
     # 描画
-    @setShaderUniform 'render', 'time', time
-    @setShaderUniform 'render', 'dataTex', @dataTex.getTexture()
-    @setShaderUniform 'render', 'outputImgTex', @outputImgTex.getTexture()
+    @setShaderUniform 'render', 'time'   , time
+    @setShaderUniform 'render', 'dataTex', @dataTexture.getTexture()
     return
 
 
-  reset: ->
-
-
-
-
   # resize
-  resize: (width, height)=>
-    for name, material of @shaderMaterials
-      @setShaderUniform name, 'resolution', new THREE.Vector2(width, height)
+  resize: (@width, @height)=>
+    for name, material of @shaders
+      @setShaderUniform name, 'resolution', new THREE.Vector2(@width, @height)
 
-    texWidth = Math.round(width * @dataTexPixelRatio)
-    texHeight = Math.round(height * @dataTexPixelRatio)
-
-    @dataTex.resize texWidth, texHeight
-    @dataTex.reset()
-
-    if @outputImgTex?
-      @outputImgTex.resize width * @devicePixelRatio, height * @devicePixelRatio
-      @outputImgTex.reset()
-
+    @dataTexture.resize Math.round(@width * @texPixelRatio), Math.round(@height * @texPixelRatio)
     return

@@ -1,19 +1,57 @@
 precision highp float;
 
 uniform float time;
+uniform float velocityTimeScale;
 uniform float texPixelRatio;
 uniform float viscosity;
 uniform float forceRadius;
 uniform float forceCoefficient;
-uniform float autoforceCoefficient;
 uniform vec2 resolution;
 uniform sampler2D dataTex;
-uniform vec2 pointerPos;
-uniform vec2 beforePointerPos;
+uniform float spirographVertices;
+uniform float spirographRadius;
 
+#pragma glslify: PI             = require('../../_utils/glsl/PI.glsl')
 #pragma glslify: map            = require('../../_utils/glsl/map.glsl')
 #pragma glslify: samplePressure = require('./samplePressure.glsl')
 #pragma glslify: snoise2        = require('glsl-noise/simplex/2d')
+
+const float PI_2 = PI * 0.5;
+
+vec2 getSpirographPos(float t, float radius, float rOffset) {
+  float an = 2.0 * PI / spirographVertices;
+  float t_an = t / an;
+  float an_2 = an * 0.5;
+  float c = cos(an_2) / cos(an * (t_an - floor(t_an)) - an_2);
+  return vec2(
+    radius * cos(t + rOffset) * c,
+    radius * sin(t + rOffset) * c
+  ) + resolution * 0.5;
+}
+
+void addForce(inout vec2 aforce, float t, float t2, float radius, vec2 offsetPos, float rOffset) {
+  float len, d;
+  vec2 pos = (getSpirographPos(t, radius, rOffset) + offsetPos) * texPixelRatio;
+  vec2 pos2 = (getSpirographPos(t2, radius, rOffset) + offsetPos) * texPixelRatio;
+  len = length(gl_FragCoord.xy - pos) / forceRadius / texPixelRatio;
+  d = clamp(1.0 - len, 0.0, 1.0) * forceCoefficient;
+  aforce += d * normalize(pos2 - pos);
+}
+
+void addForceGroup(inout vec2 aforce, vec2 offsetPos) {
+  float radius = spirographRadius;
+  float t, t2, rOffset;
+
+  for(int i = 0; i < 60; i++) {
+    t = time * 0.004 * velocityTimeScale + float(i) * PI * 2.0 / 60.0;
+    t2 = t + 0.0001 * velocityTimeScale;
+    rOffset = PI_2 + time * 0.001 * velocityTimeScale;
+
+    addForce(aforce, t, t2, radius      , offsetPos,  rOffset);
+    addForce(aforce, t, t2, radius * 2.0, offsetPos, -rOffset);
+    addForce(aforce, t, t2, radius * 4.0, offsetPos,  rOffset);
+  }
+}
 
 void main(){
   vec2 r = resolution * texPixelRatio;
@@ -30,31 +68,14 @@ void main(){
   float pTop    = samplePressure(dataTex, (gl_FragCoord.xy - offsetY) / r, r);
   float pBottom = samplePressure(dataTex, (gl_FragCoord.xy + offsetY) / r, r);
 
-  // マウス
-  vec2 mPos = vec2(pointerPos.x * texPixelRatio, r.y - pointerPos.y * texPixelRatio);
-  vec2 mPPos = vec2(beforePointerPos.x * texPixelRatio, r.y - beforePointerPos.y * texPixelRatio);
-  vec2 mouseV = mPos - mPPos;
-  float len = length(mPos - uv * r) / forceRadius / texPixelRatio;
-  float d = clamp(1.0 - len, 0.0, 1.0) * length(mouseV) * forceCoefficient;
-  vec2 mforce = d * normalize(mPos - uv * r + mouseV);
-
   // 自動
-  float noiseX = snoise2(vec2(uv.s, time / 5000.0 + uv.t));
-  float noiseY = snoise2(vec2(time / 5000.0 + uv.s, uv.t));
-  float waveX = cos(time / 1000.0 + noiseX) * sin(time / 400.0 + noiseX) * cos(time / 600.0 + noiseX);
-  float waveY = sin(time / 500.0 + noiseY) * cos(time / 800.0 + noiseY) * sin(time / 400.0 + noiseY);
-  waveX = map(waveX, -1.0, 1.0, -0.2, 1.2, true);
-  waveY = map(waveY, -1.0, 1.0, -0.2, 1.2, true);
-  vec2 aPos = vec2(
-    r.x * waveX,
-    r.y * waveY
-  );
-  len = length(aPos - uv * r) / forceRadius / texPixelRatio / 10.0;
-  d = clamp(1.0 - len, 0.0, 1.0) * autoforceCoefficient;
-  vec2 aforce = d * normalize(aPos - uv * r);
+  vec2 aforce = vec2(0.0);
+  addForceGroup(aforce, vec2( 0.0, 0.0));
+  addForceGroup(aforce, vec2(-0.4, 0.0) * resolution);
+  addForceGroup(aforce, vec2( 0.4, 0.0) * resolution);
 
   v += vec2(pRight - pLeft, pBottom - pTop) * 0.5;
-  v += mforce + aforce;
+  v += aforce;
   v *= viscosity;
   gl_FragColor = vec4(v, data.zw);
 }
