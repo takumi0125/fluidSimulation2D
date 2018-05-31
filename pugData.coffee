@@ -5,17 +5,17 @@ config =
 
     showOGP: true # ogpタグを表示するかどうか
 
-    siteTitle: 'force field | fluid simulation 2D'
+    siteTitle: 'fluid affected by force field | fluid simulation 2D'
     useTitleAsOgTitle: true # ogTitleをtitleと同じにするかどうか
     ogTitle: ''
     useTitleSeparater: true
     titleSeparater: ' | '
 
-    description: "force field"
+    description: "fluid affected by force field"
     useDescriptionAsOgDescription: true # ogDescriptionをdescriptionと同じにするかどうか
     ogDescription: ""
 
-    ogSiteName: 'force field | fluid simulation 2D'
+    ogSiteName: 'fluid affected by force field | fluid simulation 2D'
 
     ogImage: 'https://takumi0125.github.io/fluidSimulation2D/assets/img/ogpForce.png'
     ogImageType: 'image/png'
