@@ -44,7 +44,7 @@ export default class Index
     window.addEventListener 'mousemove', @mouseMove
     window.addEventListener 'touchmove', @touchMove
 
-    promise = @fluid.init('/assets/img/logo.png', @width, @height).then =>
+    promise = @fluid.init('/assets/img/logo2.png', @width, @height).then =>
       @scene.add @fluid.mesh
       @resize()
 
