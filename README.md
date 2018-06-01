@@ -9,11 +9,11 @@ https://takumi0125.github.io/fluidSimulation2D/basic/
 [![colorful fluid simulation](https://takumi0125.github.io/fluidSimulation2D/assets/img/ogpBasic.png)](https://takumi0125.github.io/fluidSimulation2D/basic/)
 
 
-## mix fuild (mix branch)
+## mix fluid (mix branch)
 
 https://takumi0125.github.io/fluidSimulation2D/mix/
 
-[![mix fuild](https://takumi0125.github.io/fluidSimulation2D/assets/img/ogpMix.png)](https://takumi0125.github.io/fluidSimulation2D/mix/)
+[![mix fluid](https://takumi0125.github.io/fluidSimulation2D/assets/img/ogpMix.png)](https://takumi0125.github.io/fluidSimulation2D/mix/)
 
 
 ## displacement by fluid (displacement branch)
