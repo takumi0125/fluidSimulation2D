@@ -15,7 +15,9 @@ export default class Fluid
     @velocityTimeScale = 1        # 速度のタイムスケール
 
     @spirographVertices = 3       # スピログラフの頂点数
-    @spirographRadius = 100       # スピログラフの半径
+    @spirographRadius1 = 100      # スピログラフの多角形の半径
+    @spirographRadius2 = 10       # スピログラフの動円の半径
+    @circleTimeScale = 2          # スピログラフの動円のタイムスケール
 
     # シェーダマテリアルを初期化
     @shaders = {}
@@ -66,7 +68,9 @@ export default class Fluid
         resolution          : { type: '2f', value: null }
         dataTex             : { type:  't', value: null }
         spirographVertices  : { type: '1f', value: @spirographVertices }
-        spirographRadius    : { type: '1f', value: @spirographRadius }
+        spirographRadius1   : { type: '1f', value: @spirographRadius1 }
+        spirographRadius2   : { type: '1f', value: @spirographRadius2 }
+        circleTimeScale     : { type: '1f', value: @circleTimeScale }
 
     # advectData: データを伝搬
     @shaders.advectData = new THREE.RawShaderMaterial
@@ -122,10 +126,15 @@ export default class Fluid
     gui.add(@, 'spirographVertices', 3, 12).step(1)
     .onChange (value)=> @setShaderUniform 'updateVelocity', 'spirographVertices', Math.round(value)
 
-    gui.add @, 'spirographRadius', 30, 400
-    .onChange (value)=> @setShaderUniform 'updateVelocity', 'spirographRadius', value
+    gui.add @, 'spirographRadius1', 30, 400
+    .onChange (value)=> @setShaderUniform 'updateVelocity', 'spirographRadius1', value
+    gui.add @, 'spirographRadius2', 6, 100
+    .onChange (value)=> @setShaderUniform 'updateVelocity', 'spirographRadius2', value
 
-    gui.add @, 'velocityTimeScale', 0, 3
+    gui.add @, 'circleTimeScale', 0, 10
+    .onChange (value)=> @setShaderUniform 'updateVelocity', 'circleTimeScale', value
+
+    gui.add @, 'velocityTimeScale', 0, 1
     .onChange (value)=> @setShaderUniform 'updateVelocity', 'velocityTimeScale', value
 
     return
