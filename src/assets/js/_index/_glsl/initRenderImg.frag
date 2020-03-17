@@ -11,8 +11,8 @@ uniform sampler2D tex;
 #pragma glslify: hsv2rgb = require('../../_utils/glsl/hsv2rgb.glsl')
 
 void main(){
-  float offsetT =  -resolution.y * 0.5;
-  float uvT = gl_FragCoord.y / texResolution.y / texPixelRatio;
+  float offsetT =  0.0;
+  float uvT = gl_FragCoord.y / texResolution.x / texPixelRatio;
   vec2 uv = vec2(
     gl_FragCoord.x / texResolution.x / texPixelRatio - resolution.x * 0.5,
     uvT + offsetT
@@ -26,9 +26,9 @@ void main(){
   color.b = 1.0 - color.a;
   color.a = 1.0;
   vec4 addColor = vec4(hsv2rgb(vec3(
-    map(noiseValue, -1.0, 1.0, 0.7, 0.9, true),
-    map(noiseValue, -1.0, 1.0, 0.8, 0.9, true),
-    map(noiseValue, -1.0, 1.0, 0.8, 0.9, true)
+    map(noiseValue, -1.0, 1.0, 0.1, 0.4, true),
+    map(noiseValue, -1.0, 1.0, 0.0, 0.1, true),
+    map(noiseValue, -1.0, 1.0, 0.0, 0.1, true)
   )), 1.0);
 
   gl_FragColor = color + addColor;
